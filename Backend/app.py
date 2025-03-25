@@ -2,7 +2,7 @@
 from flask import Flask, render_template, request, jsonify
 from bot_functions import *
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='../Frontend', static_folder='../Frontend/static')
 
 @app.route('/')
 def index():
@@ -151,9 +151,34 @@ def get_forex_data():
             return jsonify(comparison)
         else:
             return jsonify({"error": "Could not compare currency periods. Please try again later."}), 500
+    
+    elif intent == "currencies":
+        # Procesar la solicitud de monedas disponibles
+        currencies = get_available_currencies()
+        if currencies:
+            response = {
+                "intent": "currencies",
+                "currencies": currencies
+            }
+            return jsonify(response)
+        else:
+            return jsonify({"error": "No se pudieron obtener las monedas disponibles."}), 500
 
     else:
-        return jsonify({"error": "No se pudo detectar la intención. Asegúrate de usar un formato válido."}), 400
+        # Intención desconocida o no relacionada con divisas
+        return jsonify({
+            "intent": "unknown",
+            "message": "Lo siento, no puedo procesar esa solicitud. Soy un asistente especializado en divisas. Puedes preguntarme sobre conversiones, gráficos, predicciones, datos históricos o comparaciones de monedas."
+        })
+
+# Agregar una nueva ruta para obtener noticias de divisas
+@app.route('/get_forex_news', methods=['GET'])
+def get_news():
+    news = get_forex_news()
+    if news:
+        return jsonify({"news": news})
+    else:
+        return jsonify({"error": "No se pudieron obtener noticias de divisas."}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

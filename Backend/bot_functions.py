@@ -49,10 +49,11 @@ DATA_FOLDER = 'data'
 if not os.path.exists(DATA_FOLDER):
     os.makedirs(DATA_FOLDER)
 
+# Modificar la función detect_intent para agregar la detección de consultas sobre monedas disponibles
 def detect_intent(text):
     """
     Detecta la intención del usuario basándose en el texto de entrada.
-    Opciones: conversion, graph, prediction, history, compare
+    Opciones: conversion, graph, prediction, history, compare, currencies, unknown
     """
     text = text.lower()
     
@@ -62,8 +63,13 @@ def detect_intent(text):
     prediction_keywords = ['predicción', 'prediccion', 'predecir', 'futuro', 'prever', 'pronóstico', 'pronostico', 'estimación', 'estimacion']
     history_keywords = ['hace', 'anterior', 'pasado', 'antes', 'historia', 'histórico', 'historico', 'atrás', 'atras']
     compare_keywords = ['compara', 'comparar', 'comparación', 'comparacion', 'diferencia', 'versus', 'vs', 'cambio entre']
+    currencies_keywords = ['monedas disponibles', 'divisas disponibles', 'qué monedas', 'que monedas', 'cuáles monedas', 'cuales monedas', 'qué divisas', 'que divisas']
     
     # Buscar palabras clave en el texto
+    for keyword in currencies_keywords:
+        if keyword in text:
+            return "currencies"
+            
     for keyword in history_keywords:
         if keyword in text:
             return "history"
@@ -88,8 +94,12 @@ def detect_intent(text):
     if any(c.isdigit() for c in text) and any(currency in text for currency in CURRENCY_CODES.keys()):
         return "conversion"
     
-    # Por defecto, asumimos que es una consulta de conversión
-    return "conversion"
+    # Verificar si el texto contiene alguna moneda conocida
+    if any(currency in text for currency in CURRENCY_CODES.keys()):
+        return "conversion"
+    
+    # Si no se detecta ninguna intención específica, devolver "unknown"
+    return "unknown"
 
 def detect_currencies(text):
     """
@@ -734,3 +744,74 @@ def compare_currency_periods(base_currency, target_currency, period1, period2=No
     except Exception as e:
         logger.error(f"Error al comparar períodos: {e}")
         return None
+
+# Agregar al final del archivo la función para obtener noticias de divisas
+def get_forex_news():
+    """
+    Obtiene noticias actuales sobre el mercado de divisas.
+    Utiliza una API de noticias financieras.
+    """
+    try:
+        # Utilizamos Alpha Vantage News API para obtener noticias financieras
+        url = f"https://www.alphavantage.co/query?function=NEWS_SENTIMENT&topics=forex&apikey={ALPHA_VANTAGE_API_KEY}"
+        response = requests.get(url)
+        data = response.json()
+        
+        if "feed" in data:
+            news_items = []
+            # Limitamos a 5 noticias para no sobrecargar la interfaz
+            for item in data["feed"][:5]:
+                news = {
+                    "title": item.get("title", ""),
+                    "summary": item.get("summary", ""),
+                    "url": item.get("url", ""),
+                    "time_published": item.get("time_published", ""),
+                    "source": item.get("source", ""),
+                    "topics": item.get("topics", [])  # Corregido: obtenemos los topics directamente del item
+                }
+                
+                # Extraer las monedas mencionadas en el título o resumen
+                currencies = []
+                for currency_name, code in CURRENCY_CODES.items():
+                    if currency_name in news["title"].lower() or currency_name in news["summary"].lower() or code in news["title"] or code in news["summary"]:
+                        if code not in currencies:
+                            currencies.append(code)
+                
+                news["currencies"] = currencies
+                news_items.append(news)
+            
+            return news_items
+        else:
+            logger.error(f"Error al obtener noticias de Alpha Vantage: {data}")
+            return None
+    except Exception as e:
+        logger.error(f"Error al obtener noticias de divisas: {e}")
+        return None
+
+def get_available_currencies():
+    """
+    Devuelve la lista de monedas disponibles en el sistema.
+    """
+    # Agrupar los códigos de moneda únicos
+    unique_currencies = set(CURRENCY_CODES.values())
+    
+    # Crear un diccionario con los nombres completos
+    currency_names = {}
+    for name, code in CURRENCY_CODES.items():
+        if code not in currency_names:
+            currency_names[code] = []
+        if name not in currency_names[code]:
+            currency_names[code].append(name)
+    
+    # Formatear la respuesta
+    currencies_info = []
+    for code in sorted(unique_currencies):
+        names = currency_names[code]
+        main_name = max(names, key=len)  # Usamos el nombre más largo como principal
+        currencies_info.append({
+            "code": code,
+            "name": main_name,
+            "aliases": [n for n in names if n != main_name]
+        })
+    
+    return currencies_info

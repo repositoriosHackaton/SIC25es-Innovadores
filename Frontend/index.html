@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ForexAI - Asistente Inteligente de Divisas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <i class="fas fa-chart-line"></i>
+            ForexAI
+        </div>
+        <div class="header-actions">
+            <span id="current-date"></span>
+        </div>
+    </header>
+    
+    <div class="main-container">
+        <button class="sidebar-toggle" id="sidebarToggle">
+            <i class="fas fa-newspaper"></i>
+        </button>
+        <!--PANEL LATERAL DE NOTICIAS-->
+        <aside class="sidebar">
+            <div class="news-header">
+                <div>
+                    <i class="fas fa-newspaper"></i>
+                    Noticias de Divisas
+                </div>
+                <button class="news-refresh" id="refreshNews">
+                    <i class="fas fa-sync-alt"></i> Actualizar
+                </button>
+            </div>
+            
+            <div id="news-container">
+                <!-- Las noticias se cargarán dinámicamente -->
+                <div class="loading-news">
+                    <i class="fas fa-spinner fa-spin"></i> Cargando noticias...
+                </div>
+            </div>
+            
+            <div class="currency-info">
+                <h3><i class="fas fa-exchange-alt"></i> Principales Divisas</h3>
+                <div class="currency-list" id="currency-list">
+                    <!-- Las divisas se cargarán dinámicamente -->
+                    <div class="currency-item">
+                        <div class="currency-name">EUR/USD</div>
+                        <div>
+                            <span class="currency-value">1.0804</span>
+                            <span class="currency-change positive">+0.12%</span>
+                        </div>
+                    </div>
+                    <div class="currency-item">
+                        <div class="currency-name">GBP/USD</div>
+                        <div>
+                            <span class="currency-value">1.3245</span>
+                            <span class="currency-change positive">+0.08%</span>
+                        </div>
+                    </div>
+                    <div class="currency-item">
+                        <div class="currency-name">USD/JPY</div>
+                        <div>
+                            <span class="currency-value">148.64</span>
+                            <span class="currency-change negative">-0.21%</span>
+                        </div>
+                    </div>
+                    <div class="currency-item">
+                        <div class="currency-name">USD/CHF</div>
+                        <div>
+                            <span class="currency-value">0.8808</span>
+                            <span class="currency-change negative">-0.05%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <main class="main-content">
+            <!--MENSAJE PREDETERMINADO DEL BOT-->
+            <div class="chat-container">
+                <div class="message system-message">
+                    <p>Bienvenido a ForexAI, tu asistente inteligente para el mercado de divisas. Puedes pedirme:</p>
+                    <ul>
+                        <li><i class="fas fa-exchange-alt"></i> <strong>Convertir cantidades entre monedas</strong> (ej: "100 euros a dólares")</li>
+                        <li><i class="fas fa-chart-line"></i> <strong>Ver gráficos de tipos de cambio</strong> (ej: "Gráfico de USD/EUR")</li>
+                        <li><i class="fas fa-chart-pie"></i> <strong>Obtener predicciones de divisas</strong> (ej: "Predicción del euro para la próxima semana")</li>
+                        <li><i class="fas fa-history"></i> <strong>Consultar precios históricos</strong> (ej: "Precio del euro hace 1 mes")</li>
+                        <li><i class="fas fa-balance-scale"></i> <strong>Comparar precios</strong> (ej: "Comparar precio del euro hace 1 mes y hace 1 semana")</li>
+                    </ul>
+                </div>
+                <div id="result" style="display: none;"></div>
+                <div id="graph"></div>
+            </div>
+            <!--CAJA DE TEXTO DONDE EL USUARIO ESCRIBE SU MENSAJE-->
+            <div class="input-container">
+                <form id="forexForm">
+                    <input type="text" id="user_input" name="user_input" placeholder="Escribe tu consulta sobre divisas..." required>
+                    <button type="submit" aria-label="Enviar">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
