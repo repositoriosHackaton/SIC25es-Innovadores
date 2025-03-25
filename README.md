@@ -1,6 +1,6 @@
 # SIC25es-Innovadores
 <div align="center">
-<a href="#"><img src="/Frontend/logo-ForexAI" alt="Logo ForexAI" width="80" height="80" style="vertical-align: middle;"></a>
+<a href="#"><img src="/Frontend/logo-ForexAI.png" alt="Logo ForexAI" width="80" height="80" style="vertical-align: middle;"></a>
 <h3 align="center"><strong>Fijación Inteligente de Tasas de Cambio</strong></h3>
 <p align="center">
 ¡Optimiza tus decisiones financieras con inteligencia artificial!
